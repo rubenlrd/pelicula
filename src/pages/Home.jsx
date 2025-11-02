@@ -1,4 +1,4 @@
-import { peliculas } from "../data/peliculas";
+import { peliculas } from "../data/Peliculas.js";
 import CardPelicula from "../components/CardPelicula";
 
 function Home() {
