@@ -1,0 +1,19 @@
+body {
+  background-color: #f5f5f5;
+}
+
+.card {
+  border-radius: 10px;
+}
+
+.ratio {
+  background-color: #000;
+}
+
+.carousel-caption {
+  bottom: 20px;
+}
+
+.carousel iframe {
+  border-radius: 10px;
+}
