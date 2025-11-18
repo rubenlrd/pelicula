@@ -42,7 +42,7 @@ function CardPelicula({ data }) {
 
           <p className="card-text mb-2">
             <strong>Género:</strong> {data.genero} <br />
-            <strong>Año:</strong> {data.año} <br />
+            <strong>Año:</strong> {data.anio} <br />
             <strong>Plataforma:</strong> {data.plataforma}
           </p>
 
