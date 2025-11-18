@@ -1,49 +1,54 @@
-import { peliculas } from "../data/Peliculas.js";
+
+import { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
 import CardPelicula from "../components/CardPelicula";
 
 function Home() {
-  // Filtramos por tipo
-  const soloPeliculas = peliculas.filter(p => p.tipo === "pelicula");
-  const soloSeries = peliculas.filter(p => p.tipo === "serie");
+  const [peliculas, setPeliculas] = useState([]);
+  const [series, setSeries] = useState([]);
+  const [carga, setCarga] = useState(true);
+
+  useEffect(() => { //trae los datos en forma asincronicxa de la base de datos
+    const cargarDatos = async () => {
+      const { data, error } = await supabase
+        .from("contenidos")
+        .select("*")
+        .order("likes", { ascending: false }); //Ordena por LIKES en forma descendente
+
+      if (error) {
+        console.error("Error al cargar:", error);
+        return;
+      }
+
+      // Separa la películas de las series
+      setPeliculas(data.filter(item => item.tipo === "pelicula"));
+      setSeries(data.filter(item => item.tipo === "serie"));
+
+      setCarga(false);
+    };
+
+    cargarDatos();
+  }, []);
+
+  if (carga) return <p className="text-center mt-4">Cargando...</p>;
 
   return (
-    <div className="container my-4">
-      <h2 className="text-center mb-5">Películas y Series Populares</h2>
+    <>
+      <h2 className="mb-4 text-center">🎬 Películas (más populares primero)</h2>
+      <div className="row mb-5">
+        {peliculas.map(item => (
+          <CardPelicula key={item.id} data={item} />
+        ))}
+      </div>
 
-      {/* 🎬 Sección de Películas */}
-      <section className="mb-5">
-        <h3 className="mb-3 border-bottom pb-2">
-          🎬 Películas
-        </h3>
-        <div className="row">
-          {soloPeliculas.length > 0 ? (
-            soloPeliculas.map(p => (
-              <CardPelicula key={p.id} data={p} />
-            ))
-          ) : (
-            <p className="text-muted">No hay películas disponibles.</p>
-          )}
-        </div>
-      </section>
-
-      {/* 📺 Sección de Series */}
-      <section>
-        <h3 className="mb-3 border-bottom pb-2">
-          📺 Series
-        </h3>
-        <div className="row">
-          {soloSeries.length > 0 ? (
-            soloSeries.map(p => (
-              <CardPelicula key={p.id} data={p} />
-            ))
-          ) : (
-            <p className="text-muted">No hay series disponibles.</p>
-          )}
-        </div>
-      </section>
-    </div>
+      <h2 className="mb-4 text-center">📺 Series (más populares primero)</h2>
+      <div className="row">
+        {series.map(item => (
+          <CardPelicula key={item.id} data={item} />
+        ))}
+      </div>
+    </>
   );
 }
 
 export default Home;
-

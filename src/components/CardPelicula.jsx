@@ -1,27 +1,30 @@
 import { useState } from "react";
-import { BsHeart, BsHeartFill, BsChatDots } from "react-icons/bs";
+import { supabase } from "../supabaseClient";
+import { BsHeart } from "react-icons/bs";
 
 function CardPelicula({ data }) {
-  const [like, setLike] = useState(false);
-  const [comentarios, setComentarios] = useState([]); // guarda los comentarios
-  const [nuevoComentario, setNuevoComentario] = useState("");
-  const [mostrarInput, setMostrarInput] = useState(false);
+  const [likesCount, setLikesCount] = useState(data.likes || 0);
+  const [loadingLike, setLoadingLike] = useState(false);
 
-  const toggleLike = () => {
-    setLike(!like);
-  };
+  const addLike = async () => {
+    if (loadingLike) return; // evita doble clic rápido
+    setLoadingLike(true);
 
-  const toggleComentar = () => {
-    setMostrarInput(!mostrarInput);
-  };
+    const newCount = likesCount + 1;
 
-  const agregarComentario = (e) => {
-    e.preventDefault();
-    if (nuevoComentario.trim() !== "") {
-      setComentarios([...comentarios, nuevoComentario]);
-      setNuevoComentario("");
-      setMostrarInput(false);
+    // Actualizar en Supabase
+    const { error } = await supabase
+      .from("contenidos")
+      .update({ likes: newCount })
+      .eq("id", data.id);
+
+    if (!error) {
+      setLikesCount(newCount); // solo avanzar si no hubo error
+    } else {
+      console.error("Error al sumar like:", error);
     }
+
+    setLoadingLike(false);
   };
 
   return (
@@ -36,64 +39,22 @@ function CardPelicula({ data }) {
 
         <div className="card-body">
           <h5 className="card-title">{data.titulo}</h5>
+
           <p className="card-text mb-2">
             <strong>Género:</strong> {data.genero} <br />
             <strong>Año:</strong> {data.año} <br />
             <strong>Plataforma:</strong> {data.plataforma}
           </p>
 
-          {/* ❤️ y 💬 botones */}
-          <div className="d-flex justify-content-between align-items-center">
-            <button
-              onClick={toggleLike}
-              className="btn btn-outline-danger border-0"
-              title={like ? "Quitar me gusta" : "Dar me gusta"}
-            >
-              {like ? (
-                <BsHeartFill size={22} color="red" />
-              ) : (
-                <BsHeart size={22} />
-              )}
-            </button>
-
-            <div className="d-flex align-items-center">
-              <BsChatDots size={20} className="me-1 text-primary" />
-              <span className="me-2">{comentarios.length}</span>
-              <button
-                onClick={toggleComentar}
-                className="btn btn-sm btn-outline-primary"
-              >
-                Comentar
-              </button>
-            </div>
-          </div>
-
-          {/* 📝 Caja para agregar comentario */}
-          {mostrarInput && (
-            <form onSubmit={agregarComentario} className="mt-3">
-              <input
-                type="text"
-                className="form-control mb-2"
-                placeholder="Escribe tu comentario..."
-                value={nuevoComentario}
-                onChange={(e) => setNuevoComentario(e.target.value)}
-              />
-              <button type="submit" className="btn btn-sm btn-primary">
-                Enviar
-              </button>
-            </form>
-          )}
-
-          {/* 📋 Lista de comentarios */}
-          {comentarios.length > 0 && (
-            <ul className="list-group list-group-flush mt-3">
-              {comentarios.map((c, index) => (
-                <li key={index} className="list-group-item small">
-                  {c}
-                </li>
-              ))}
-            </ul>
-          )}
+          {/* ❤️ BOTÓN LIKE SOLO SUMA */}
+          <button
+            onClick={addLike}
+            className="btn btn-outline-danger d-flex align-items-center gap-2"
+            disabled={loadingLike}
+          >
+            <BsHeart size={22} />
+            <span>{likesCount}</span>
+          </button>
         </div>
       </div>
     </div>

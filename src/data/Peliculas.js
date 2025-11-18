@@ -15,6 +15,7 @@ export const peliculas = [
     genero: "Drama",
     año: 2008,
     imagen: "/banner/breaking-bad.jpg",
+    plataforma: "NetFlix",
     tipo: "serie"
   },
   {
