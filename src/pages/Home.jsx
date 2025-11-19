@@ -1,53 +1,85 @@
 
-import { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { useState } from "react";
 import CardPelicula from "../components/CardPelicula";
+import Paginacion from "../components/Paginacion";
+import { usePeliculas } from "../hooks/usePeliculas";
+import { useSeries } from "../hooks/useSeries";
+import { useRealtimeLikes } from "../hooks/useRealtimeLikes";
 
 function Home() {
-  const [peliculas, setPeliculas] = useState([]);
-  const [series, setSeries] = useState([]);
-  const [carga, setCarga] = useState(true);
+  const [pagePeliculas, setPagePeliculas] = useState(1);
+  const [pageSeries, setPageSeries] = useState(1);
 
-  useEffect(() => { //trae los datos en forma asincronicxa de la base de datos
-    const cargarDatos = async () => {
-      const { data, error } = await supabase
-        .from("contenidos")
-        .select("*")
-        .order("likes", { ascending: false }); //Ordena por LIKES en forma descendente
+  useRealtimeLikes();
 
-      if (error) {
-        console.error("Error al cargar:", error);
-        return;
-      }
+  const { peliculasQuery, likeMutation: likePelicula } =
+    usePeliculas(pagePeliculas);
 
-      // Separa la películas de las series
-      setPeliculas(data.filter(item => item.tipo === "pelicula"));
-      setSeries(data.filter(item => item.tipo === "serie"));
+  const { seriesQuery, likeMutation: likeSerie } =
+    useSeries(pageSeries);
 
-      setCarga(false);
-    };
-
-    cargarDatos();
-  }, []);
-
-  if (carga) return <p className="text-center mt-4">Cargando...</p>;
+  if (peliculasQuery.isLoading || seriesQuery.isLoading)
+    return <p>Cargando...</p>;
 
   return (
-    <>
-      <h2 className="mb-4 text-center">🎬 Películas (más populares primero)</h2>
-      <div className="row mb-5">
-        {peliculas.map(item => (
-          <CardPelicula key={item.id} data={item} />
+    <div>
+
+      {/* PELÍCULAS */}
+      <h2>🎬 Películas Populares</h2>
+
+      <h4>Top 6</h4>
+      <div className="row">
+        {peliculasQuery.data.top.map((p) => (
+          <CardPelicula
+            key={p.id}
+            data={p}
+            onLike={(newLikes) => likePelicula.mutate({ id: p.id, newLikes })}
+          />
         ))}
       </div>
 
-      <h2 className="mb-4 text-center">📺 Series (más populares primero)</h2>
+      <h4>Más películas</h4>
       <div className="row">
-        {series.map(item => (
-          <CardPelicula key={item.id} data={item} />
+        {peliculasQuery.data.paginadas.map((p) => (
+          <CardPelicula
+            key={p.id}
+            data={p}
+            onLike={(newLikes) => likePelicula.mutate({ id: p.id, newLikes })}
+          />
         ))}
       </div>
-    </>
+
+      <Paginacion page={pagePeliculas} setPage={setPagePeliculas} />
+
+      <hr className="my-5" />
+
+      {/* SERIES */}
+      <h2>📺 Series Populares</h2>
+
+      <h4>Top 6</h4>
+      <div className="row">
+        {seriesQuery.data.top.map((s) => (
+          <CardPelicula
+            key={s.id}
+            data={s}
+            onLike={(newLikes) => likeSerie.mutate({ id: s.id, newLikes })}
+          />
+        ))}
+      </div>
+
+      <h4>Más series</h4>
+      <div className="row">
+        {seriesQuery.data.paginadas.map((s) => (
+          <CardPelicula
+            key={s.id}
+            data={s}
+            onLike={(newLikes) => likeSerie.mutate({ id: s.id, newLikes })}
+          />
+        ))}
+      </div>
+
+      <Paginacion page={pageSeries} setPage={setPageSeries} />
+    </div>
   );
 }
 
