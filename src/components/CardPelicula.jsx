@@ -12,6 +12,7 @@ function CardPelicula({ data, onLike }) {
     const newLikes = likesCount + 1;
     setLikesCount(newLikes);
 
+    //Traigo la desde la función onLike 
     try {
       await onLike(newLikes);
     } catch {
