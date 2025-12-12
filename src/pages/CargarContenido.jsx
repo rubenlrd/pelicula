@@ -16,9 +16,7 @@ function CargarContenido({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { error } = await supabase
-      .from("contenidos")
-      .insert([
+    const { error } = await supabase.from("contenidos").insert([
         {
           titulo,
           genero,
