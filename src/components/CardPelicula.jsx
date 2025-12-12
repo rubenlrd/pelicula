@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { BsHeart } from "react-icons/bs";
 
 function CardPelicula({ data, onLike }) {
@@ -12,11 +13,10 @@ function CardPelicula({ data, onLike }) {
     const newLikes = likesCount + 1;
     setLikesCount(newLikes);
 
-    //Traigo la desde la función onLike 
     try {
       await onLike(newLikes);
     } catch {
-      setLikesCount(likesCount); // revertir si falla
+      setLikesCount(likesCount); // revert back si falla
     }
 
     setLoading(false);
@@ -32,17 +32,26 @@ function CardPelicula({ data, onLike }) {
           style={{ height: "400px", objectFit: "cover" }}
         />
 
-        <div className="card-body">
-          <h5>{data.titulo}</h5>
+        <div className="card-body d-flex flex-column">
+          <h5 className="mb-3">{data.titulo}</h5>
 
+          {/* BOTÓN DE LIKE */}
           <button
-            className="btn btn-outline-danger d-flex align-items-center gap-2"
+            className="btn btn-outline-danger d-flex align-items-center gap-2 mb-3"
             onClick={addLike}
             disabled={loading}
           >
             <BsHeart size={20} />
             {likesCount}
           </button>
+
+          {/* BOTÓN VER MÁS */}
+          <Link
+            to={`/${data.tipo}/${data.id}`}
+            className="btn btn-primary mt-auto"
+          >
+            Ver más
+          </Link>
         </div>
       </div>
     </div>
@@ -51,40 +60,33 @@ function CardPelicula({ data, onLike }) {
 
 export default CardPelicula;
 
-
 // import { useState } from "react";
-// import { supabase } from "../supabaseClient";
 // import { BsHeart } from "react-icons/bs";
 
-// function CardPelicula({ data }) {
-//   const [likesCount, setLikesCount] = useState(data.likes || 0);
-//   const [loadingLike, setLoadingLike] = useState(false);
+// function CardPelicula({ data, onLike }) {
+//   const [likesCount, setLikesCount] = useState(data.likes);
+//   const [loading, setLoading] = useState(false);
 
 //   const addLike = async () => {
-//     if (loadingLike) return; // evita doble clic rápido
-//     setLoadingLike(true);
+//     if (loading) return;
+//     setLoading(true);
 
-//     const newCount = likesCount + 1;
+//     const newLikes = likesCount + 1;
+//     setLikesCount(newLikes);
 
-//     // Actualizar en Supabase
-//     const { error } = await supabase
-//       .from("contenidos")
-//       .update({ likes: newCount })
-//       .eq("id", data.id);
-
-//     if (!error) {
-//       setLikesCount(newCount); // solo avanzar si no hubo error
-//       //if (refrescar) refrescar(); //se cuelga la card que se dio like
-//     } else {
-//       console.error("Error al sumar like:", error);
+//     //Traigo la desde la función onLike 
+//     try {
+//       await onLike(newLikes);
+//     } catch {
+//       setLikesCount(likesCount); // revertir si falla
 //     }
 
-//     setLoadingLike(false);
+//     setLoading(false);
 //   };
 
 //   return (
 //     <div className="col-md-4 mb-3">
-//       <div className="card h-100 shadow-sm">
+//       <div className="card shadow-sm h-100">
 //         <img
 //           src={data.imagen}
 //           className="card-img-top"
@@ -93,22 +95,15 @@ export default CardPelicula;
 //         />
 
 //         <div className="card-body">
-//           <h5 className="card-title">{data.titulo}</h5>
+//           <h5>{data.titulo}</h5>
 
-//           <p className="card-text mb-2">
-//             <strong>Género:</strong> {data.genero} <br />
-//             <strong>Año:</strong> {data.anio} <br />
-//             <strong>Plataforma:</strong> {data.plataforma}
-//           </p>
-
-//           {/* ❤️ BOTÓN LIKE SOLO SUMA */}
 //           <button
-//             onClick={addLike}
 //             className="btn btn-outline-danger d-flex align-items-center gap-2"
-//             disabled={loadingLike}
+//             onClick={addLike}
+//             disabled={loading}
 //           >
-//             <BsHeart size={22} />
-//             <span>{likesCount}</span>
+//             <BsHeart size={20} />
+//             {likesCount}
 //           </button>
 //         </div>
 //       </div>
