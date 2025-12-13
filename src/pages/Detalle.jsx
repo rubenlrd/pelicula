@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
+import { Link } from "react-router-dom";
+
 
 function Detalle({ user }) {
     const { id } = useParams(); // ID de película o serie
@@ -35,8 +37,8 @@ function Detalle({ user }) {
         if (!nuevoComentario.trim()) return;
 
         const { error } = await supabase.from("comentarios").insert({
-            contenido: nuevoComentario,     
-            usuario_id: user.id,                   
+            contenido: nuevoComentario,
+            usuario_id: user.id,
             pelicula_id: id,
         });
 
@@ -102,8 +104,9 @@ function Detalle({ user }) {
                     </div>
                 ) : (
                     <p className="text-muted">
-                        Debes <a href="/login">iniciar sesión</a> para comentar.
+                        Debes <Link to="/login">iniciar sesión</Link> para comentar.
                     </p>
+
                 )}
 
                 {/* LISTA COMENTARIOS */}
